@@ -10,7 +10,7 @@
 #include <string.h>
 
 int ms = 0, seconds = 0, minutes = 0, saved = 0;
-char savedMsArr[2], savedSArr[2], savedMArr[2];
+char savedMsArr[3], savedSArr[3], savedMArr[3];
 
 OS_TID taskID1_btn;
 OS_TID taskID2_time;
@@ -23,6 +23,10 @@ void btnService() {
             sprintf(savedMArr, "%d", minutes);
             sprintf(savedSArr, "%d", seconds);
             sprintf(savedMsArr, "%d ", ms);
+
+            memset(savedMArr, 0, sizeof(savedMArr));
+            memset(savedSArr, 0, sizeof(savedSArr));
+            memset(savedMsArr, 0, sizeof(savedMsArr));
         }
     }
 }
@@ -46,7 +50,7 @@ void timeService() {
 
 void lcdService() {
     while (1) {
-        char msArr[8], sArr[2], mArr[2];
+        char msArr[3], sArr[3], mArr[3];
 
         LCD_set(LCD_CUR_OFF);
         sprintf(mArr, "%d", minutes);
@@ -69,8 +73,8 @@ void lcdService() {
             LCD_print(savedMsArr);
         }
 
-        memset(msArr, 0, sizeof(mArr));
-        memset(msArr, 0, sizeof(sArr));
+        memset(mArr, 0, sizeof(mArr));
+        memset(sArr, 0, sizeof(sArr));
         memset(msArr, 0, sizeof(msArr));
     }
 }
