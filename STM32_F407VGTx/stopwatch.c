@@ -10,7 +10,7 @@
 #include <string.h>
 
 int ms = 0, seconds = 0, minutes = 0, saved = 0;
-char savedMsArr[3], savedSArr[3], savedMArr[3];
+char savedTimeArr[9];
 
 OS_TID taskID1_btn;
 OS_TID taskID2_time;
@@ -19,14 +19,8 @@ OS_TID taskID3_lcd;
 void btnService() {
     while (1) {
         if (io_read(USER_BUTTON)) {
+            snprintf(savedTimeArr, sizeof(savedTimeArr), "%02d:%02d:%02d", minutes, seconds, ms);
             saved = 1;
-            sprintf(savedMArr, "%d", minutes);
-            sprintf(savedSArr, "%d", seconds);
-            sprintf(savedMsArr, "%d ", ms);
-
-            memset(savedMArr, 0, sizeof(savedMArr));
-            memset(savedSArr, 0, sizeof(savedSArr));
-            memset(savedMsArr, 0, sizeof(savedMsArr));
         }
     }
 }
@@ -50,38 +44,27 @@ void timeService() {
 
 void lcdService() {
     while (1) {
-        char msArr[3], sArr[3], mArr[3];
+        char timeArr[9];
 
-        LCD_set(LCD_CUR_OFF);
-        sprintf(mArr, "%d", minutes);
-        sprintf(sArr, "%d", seconds);
-        sprintf(msArr, "%d ", ms);
+        snprintf(timeArr, sizeof(timeArr),"%02d:%02d:%02d", minutes, seconds, ms);
 
         LCD_set(LCD_LINE1);
-        LCD_print(mArr);
-        LCD_print(":");
-        LCD_print(sArr);
-        LCD_print(":");
-        LCD_print(msArr);
+        LCD_print(timeArr);
 
         if (saved) {
             LCD_set(LCD_LINE2);
-            LCD_print(savedMArr);
-            LCD_print(":");
-            LCD_print(savedSArr);
-            LCD_print(":");
-            LCD_print(savedMsArr);
+            LCD_print(savedTimeArr);
         }
 
-        memset(mArr, 0, sizeof(mArr));
-        memset(sArr, 0, sizeof(sArr));
-        memset(msArr, 0, sizeof(msArr));
+        memset(timeArr, 0, sizeof(timeArr));
+        memset(savedTimeArr, 0, sizeof(savedTimeArr));
     }
 }
 
 __task void board_init(void) {
     LED_setup();
     LCD_setup();
+    LCD_set(LCD_CUR_OFF);
 
     taskID1_btn = os_tsk_create(btnService, 0);
     taskID2_time = os_tsk_create(timeService, 0);
