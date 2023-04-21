@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 OS_TID taskID1_countdown;
 OS_TID taskID2_printing;
@@ -20,7 +21,7 @@ bool work_r = true;
 bool counting = false;
 bool start = false;
 
-int current_mins = 0;
+int current_mins = 0;;
 int current_secs = 0;
 
 __task void countdown(void) {
@@ -37,10 +38,6 @@ __task void countdown(void) {
             counting = true;
         }
 
-        if (!start) {
-            continue;
-        }
-
         // Counting
         delay_ms(1000);
         if(current_secs == 0) {
@@ -50,7 +47,6 @@ __task void countdown(void) {
             --current_secs;
         }
 
-        // After countdown ends
         if (current_mins == 0 && current_secs == 0) {
             if (work_r) {
                 ++work_count;
@@ -65,7 +61,7 @@ __task void printing(void) {
     char time_arr[6];
 
     while(true) {
-        snprintf(time_arr, sizeof(time_arr), "%02d:%02d", current_mins, current_secs);
+        sprintf(time_arr, "%02d:%02d", current_mins, current_secs);
 
         LCD_set(LCD_LINE1);
         LCD_print(time_arr);
@@ -79,17 +75,18 @@ __task void printing(void) {
     }
 }
 
-__task void skip_or_start(void) {
+__task void skip_start(void) {
     while(true) {
-        if(io_read(USER_BUTTON) && counting) {
-            if(start) {
+        if(io_read(USER_BUTTON)) {
+            if (!start) {
+                start = true;
+                taskID1_countdown = os_tsk_create(countdown, 0);
+            } else {
                 if(work_r) {
                     ++work_count;
                 }
                 work_r = !work_r;
                 counting = false;
-            } else {
-                start = true;
             }
             delay_ms(1000);
         }
@@ -100,10 +97,10 @@ __task void board_init(void) {
     LCD_setup();
     LED_setup();
     LCD_set(LCD_CUR_OFF);
-    
-    taskID1_countdown = os_tsk_create(countdown, 0);
+    LCD_set(LCD_CUR_OFF);
+
     taskID2_printing = os_tsk_create(printing, 0);
-    taskID3_skipping = os_tsk_create(skip_or_start, 0);
+    taskID3_skipping = os_tsk_create(skip_start, 0);
 
     os_tsk_delete_self (); // Delete the init(self) task
 }
