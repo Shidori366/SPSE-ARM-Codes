@@ -21,7 +21,7 @@ bool work_r = true;
 bool counting = false;
 bool start = false;
 
-int current_mins = 0;;
+int current_mins = 0;
 int current_secs = 0;
 
 __task void countdown(void) {
